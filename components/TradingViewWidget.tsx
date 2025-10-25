@@ -25,4 +25,4 @@ const TradingViewWidget = ({ title, scriptUrl, config, height = 600, className }
     );
 }
 
-export default memo(TradingViewWidget);
+export default memo(TradingViewWidget); 
