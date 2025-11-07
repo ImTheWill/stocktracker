@@ -1,21 +1,22 @@
 import { betterAuth } from "better-auth";
-import { typeormAdapter } from "@hedystia/better-auth-typeorm";
-
-import { getDataSource } from "@/database/typeorm";
-import {nextCookies} from "better-auth/next-js"
-
+import { mongodbAdapter} from "better-auth/adapters/mongodb";
+import { connectToDatabase} from "@/database/mongoose";
+import { nextCookies} from "better-auth/next-js";
 
 let authInstance: ReturnType<typeof betterAuth> | null = null;
 
-export const getAuth = async ()=>{
-    if (authInstance) return authInstance;
-    const postgres = await getDataSource();
-    if(!postgres.isInitialized) throw new Error('TypeOrm Postgres Connection Error: Database not initialized')
-    console.log("Database connected successfully")
+export const getAuth = async () => {
+    if(authInstance) return authInstance;
+
+    const mongoose = await connectToDatabase();
+    const db = mongoose.connection.db;
+
+    if(!db) throw new Error('MongoDB connection not found');
+
     authInstance = betterAuth({
-        database: typeormAdapter(postgres as any),
+        database: mongodbAdapter(db as any),
         secret: process.env.BETTER_AUTH_SECRET,
-        baseUrl: process.env.BETTER_AUTH_URL,
+        baseURL: process.env.BETTER_AUTH_URL,
         emailAndPassword: {
             enabled: true,
             disableSignUp: false,
@@ -23,13 +24,11 @@ export const getAuth = async ()=>{
             minPasswordLength: 8,
             maxPasswordLength: 128,
             autoSignIn: true,
-
         },
-        plugins: [nextCookies()]
+        plugins: [nextCookies()],
+    });
 
-    })
-    console.log("Passed Better auth instance")
     return authInstance;
 }
 
-export const auth = await getAuth()
+export const auth = await getAuth();
