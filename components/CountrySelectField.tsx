@@ -26,7 +26,7 @@ const CountrySelectField = ({name, label, control, error, required = false}:Coun
       render = {({field})=>(
           <Select value={field.value} onValueChange ={field.onChange}>
               <SelectTrigger className="select-trigger">
-                  <SelectValue placeholder={"United States"} />
+                  <SelectValue placeholder={"country"} />
               </SelectTrigger>
               <SelectContent className='bg-gray-800 border-gray-600 text-white'>
                   {options.map((option)=>(

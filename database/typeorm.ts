@@ -6,22 +6,17 @@ import { WatchList } from './models/WatchList';
 
 export const PostgresDataSource = new DataSource({
     type: "postgres",
-    host: process.env.DB_HOST,
+    host: process.env.DB_HOST || "localhost",
     port: parseInt(process.env.DB_PORT || "5433"),
-    username: process.env.DB_USERNAME,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
+    username: process.env.DB_USERNAME || "Moxie",
+    password: process.env.DB_PASSWORD || "Mox1234",
+    database: process.env.DB_NAME || "postgres",
     entities: [WatchList],
     
-    // DEVELOPMENT: true - auto-creates/updates tables (convenient but dangerous)
-    // PRODUCTION: false - use migrations instead (safe, controlled)
+
     synchronize: process.env.NODE_ENV !== 'production',
-    
-    // DEVELOPMENT: true - see all SQL queries in console
-    // PRODUCTION: false or ["error"] - only log errors
     logging: process.env.NODE_ENV === 'development',
-    
-    // Connection pooling (BOTH environments)
+
     extra: {
         max: 10,
         min: 2,
@@ -29,7 +24,6 @@ export const PostgresDataSource = new DataSource({
     },
 });
 
-// Singleton pattern to prevent duplicate connections
 declare global {
     var __dataSource: DataSource | undefined;
 }
@@ -39,6 +33,7 @@ export const getDataSource = async (): Promise<DataSource> => {
     if (process.env.NODE_ENV === 'production') {
         if (!PostgresDataSource.isInitialized) {
             await PostgresDataSource.initialize();
+            console.log(PostgresDataSource.isInitialized)
         }
         return PostgresDataSource;
     }
@@ -50,6 +45,7 @@ export const getDataSource = async (): Promise<DataSource> => {
 
     if (!global.__dataSource.isInitialized) {
         await global.__dataSource.initialize();
+        console.log(__dataSource?.isInitialized)
     }
 
     return global.__dataSource;
